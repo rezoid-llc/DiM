@@ -1,132 +1,131 @@
 /*
-//  "Digital Implmentation Machine" Emulation System
-//  Written by Daniel Perez.
+//    "Digital Implementation Machine"
+//    Official Emulation System:
+//
+//    "main.c"
 */
 
 
-#include <stdio.h>
-#include <stdint.h>
-#define DIM_MEMORY_MAXIMUM (1 << 24)
-#define DIM_MEMORY_INSTALL (1 << 2)
-#define DIM_MEMORY_INBOUND(increment) (increment < DIM_MEMORY_INSTALL && increment < DIM_MEMORY_MAXIMUM)
-#define DIM_MEMORY_WORD(byte_01, byte_02) ((uint16_t)byte_01 << 8) | byte_02
-
-uint16_t register_a;
-uint16_t register_b;
-uint16_t register_c;
-uint16_t register_d;
-uint32_t register_e;
-uint8_t  register_f;
-
-uint8_t  memory[DIM_MEMORY_INSTALL];
+#include  <stdint.h>
+#include  <stdio.h>
+#define   MEM_MAX (1 << 24)
+#define   MEM_INS (1 << 8)
 
 
-void DIM_fullReset (void) {
-  
-  register_a = 0x0000;
-  register_b = 0x0000;
-  register_c = 0x0000;
-  register_d = 0x0000;
-  register_e = 0x00000000;
-  register_f = 0x00;
+uint16_t reg_a;         //  "General-Purpose (Register A)";
+uint16_t reg_b;         //  "General-Purpose (Register B)";
+uint16_t reg_c;         //  "General-Purpose (Register C)";
+uint16_t reg_d;         //  "General-Purpose (Register D)";
+uint32_t reg_e;         //  "Instruction Pointer (Register E)";
+uint8_t  reg_f;         //  "Instruction-Executed Flags (Register F)";
+uint32_t reg_g;         //  "Pointer (Register G)";
+uint32_t reg_h;         //  "Pointer (Register H)";
+uint8_t  mem[MEM_INS];  //  "General-Purpose (Memory)";
 
-  uint32_t increment  = 0x00000000;
-  while (DIM_MEMORY_INBOUND(increment)) {
-      memory[increment] = 0x00;
-      increment += 0x01;
+
+void DiM_RESET(void) {
+
+  reg_a = 0x00;
+  reg_b = 0x00;
+  reg_c = 0x00;
+  reg_d = 0x00;
+  reg_e = 0x00;
+  reg_f = 0x00;
+  reg_g = 0x00;
+  reg_h = 0x00;
+
+  while (reg_e < MEM_MAX && reg_e < MEM_INS) {
+    mem[reg_e] = 0x00;
+    reg_e++;
   }
+
+  reg_e = 0x00;
+  
 }
 
-void DIM_memoryDump (void) {
+void DiM_REG_DUMP(void) {
 
-  uint32_t increment = 0x00000000;
-  printf("MEMORY DUMP\n");
-  while (DIM_MEMORY_INBOUND(increment)) {
+  printf(">>  A: 0x%04X\n", reg_a);
+  printf(">>  B: 0x%04X\n", reg_b);
+  printf(">>  C: 0x%04X\n", reg_c);
+  printf(">>  D: 0x%04X\n", reg_d);
+  printf(">>  E: 0x%06X\n", reg_e);
+  printf(">>  F: 0b%08B\n", reg_f);
+  printf(">>  G: 0x%06X\n", reg_g);
+  printf(">>  H: 0x%06X\n", reg_h);
+  
+}
 
-    if ((increment % 16) == 0x00 && increment > 0x00) {
-      printf("\n0x%06X  >>  ", increment);
-    } else if ((increment % 16) == 0x00) {
-      printf("0x%06X  >>  ", increment);      
-    }
+void DiM_MEM_DUMP(void) {
 
-    printf("%02X ", memory[increment]);
-    increment += 0x01;
-      
-  }
+  uint32_t row = 0x00;
+  uint32_t col = 0x00;
 
+  while (row < MEM_INS) {
+  printf("##  0x%06X:", row);
+      while (col < 16) {
+      printf(" %04X", ((mem[col + row + 0x00] << 0x08) | (mem[col + row + 0x01])));
+      col += 0x02; }
   printf("\n");
+  col = 0x00;
+  row += 0x10;
+  }
   
 }
 
-void DIM_registerDump (void) {
-  printf("REGISTER DUMP\n");
-  printf("RA: 0x%04X\n", register_a);
-  printf("RB: 0x%04X\n", register_b);
-  printf("RC: 0x%04X\n", register_c);
-  printf("RD: 0x%04X\n", register_d);
-  printf("RE: 0x%06X\n", register_e);
-  printf("RF: 0b%08B\n", register_f);
+void DiM_TICK(void) {
+  //  "For when "DiM" finally operates off of a clock signal."
 }
 
-void DIM_tick (void) {
+void DiM_EXECUTE(void) {
 
-    uint8_t opcode = (memory[register_e] & 0xFC) >> 0x02;
-    uint8_t select = (memory[register_e] & 0x03);
+  uint8_t ins = mem[reg_e];
+  uint8_t opc = ((ins & 0xFC) >> 2);
+  uint8_t set = ins & 0x03;
 
-    printf("OP: 0x%02X  RE: 0x%02X  SB: 0b%08B  IO: 0x%08X  IS: 0x%08X\n", memory[register_e], register_e, register_f, opcode, select);
+  switch (opc) {
 
-    switch (opcode) {
+    case 0x00:
+      NLL: reg_e += 0x01;
+      break;
 
-      case (0x00):;
-        //  "NLL":
-        register_e += 0x01;
-        break;
+    case 0x01:
+      TRM: reg_f |= 0x80;
+      break;
 
-      case (0x01):;
-        //  "TRM":
-        register_f |= 0x01;
-        break;
+    
 
-      case (0x08):;
-        //  "LWI"
-        uint16_t immediate = DIM_MEMORY_WORD(memory[register_e + 0x01], memory[register_e + 0x02]);
-        if (select == 0x00) { register_a = immediate;
-        } else if (select == 0x01) { register_b = immediate;
-        } else if (select == 0x02) { register_c = immediate;
-        } else if (select == 0x03) { register_d = immediate;
-        } register_e += 0x03;
-        break;
+    default:
+      goto NLL;
+     
+  }
+  
+}
 
-      default:;
-      //  "NLL":
-        register_e += 0x01;
-        break;
-      
-    }
+void DiM_VALIDATE(void) {
+
+  reg_a = reg_a & 0xFFFF;
+  reg_b = reg_b & 0xFFFF;
+  reg_c = reg_c & 0xFFFF;
+  reg_d = reg_d & 0xFFFF;
+  reg_e = reg_e & 0xFFFFFF;
+  reg_f = reg_f & 0xFF;
+  reg_g = reg_g & 0xFFFFFF;
+  reg_h = reg_h & 0xFFFFFF;  
   
 }
 
 
-int main (void) {
+int main(void) {
 
-  DIM_fullReset();
+  DiM_RESET();
 
-  //  Higher six bits are the instruction.
-  //  Lower two bits is the register selection.
-  memory[0x00] = 0b00100000;
-  memory[0x01] = 0xFF;
-  memory[0x02] = 0xFF;
-  memory[0x03] = 0b00000100;
-
-  DIM_memoryDump();
-
-  printf("EXECUTION STARTED:\n");
-  while (DIM_MEMORY_INBOUND(register_e) && (!(register_f & 0x01))) {
-    DIM_tick();
+  while (reg_e < (MEM_INS - 1) && reg_e < (MEM_MAX - 1) && (!(reg_f & 0x80))) {
+    DiM_EXECUTE();
+    DiM_VALIDATE();
   }
 
-  DIM_registerDump();
-  
-  return 0x00;
+  DiM_REG_DUMP();
+  DiM_MEM_DUMP();
   
 }
