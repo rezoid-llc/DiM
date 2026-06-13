@@ -1,13 +1,15 @@
-##    Digital Implementation Machine
->>    Emulated Implementation of the "Diminished-Instruction-Set-Architecture" Specification
+#     "DiM"
+##    Emulated "DiSC" Implementation
 
-####  About
+---
+
+##  About
 This is the primary repository for the Digital Implementation Machine emulator, which is an implementation
 of the "Diminished-Instruction-Set-Computer" architecture, albeit written in the "C" programming language.
 The primary goal of the project is full compliance with the "DiSC" architecture in all areas as well as to
 implement secondary features that further increase usability and allow for an expandable environment.
 
-####  Specifications
+##  Specifications
 These are the general specifications of the emulator, in compliance with the "DiSC" architecture.
 
 ++  16,777,216 bytes of addressable memory.
