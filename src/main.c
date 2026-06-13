@@ -25,6 +25,12 @@ uint8_t  mem[MEM_INS];  //  "General-Purpose (Memory)";
 
 
 
+void DiM_LOAD (void) {
+
+  mem[0x000000] = 0b00001100;
+  
+}
+
 void DiM_RESET(void) {
 
   reg_a = 0x00;
@@ -42,6 +48,8 @@ void DiM_RESET(void) {
   }
 
   reg_e = 0x00;
+
+  DiM_LOAD();
 
 }
 
@@ -89,29 +97,37 @@ void DiM_EXECUTE(void) {
   uint8_t opc = ((ins & 0xFC) >> 0x02);
   uint8_t set = (ins & 0x03);
 
-  printf("set: %d\n", set);
 
   switch (opc) {
 
     case 0x00:
-      NLL:; reg_e += 0x01;
-      break;
+      NLL:; reg_e += 0x01; break;
 
     case 0x01:
-      TRM:; reg_f |= 0x80;
-      break;
+      TRM:; reg_f |= 0x80; break;
 
     case 0x02:
+      RST:; DiM_RESET(); break;
+
+    case 0x03:
       LWI:;
       uint16_t nxt = (mem[reg_e + 0x01] << 0x08 | mem[reg_e + 0x02]);
       if (set == 0x00) { reg_a = nxt; }
       else if (set == 0x01) { reg_b = nxt; }
       else if (set == 0x02) { reg_c = nxt; }
       else if (set == 0x03) { reg_d = nxt; }
-      reg_e += 0x02;
+      reg_e += 0x02; break;
+
+    case 0x04:
+    //  "Nothing here."
+      
+    case 0x05:
+    //  "Nothing here."
 
     default:
-      goto NLL;
+      printf("UNKNOWN INSTRUCTION: \"0x%02X\"\n", opc);
+      goto TRM;
+
 
   }
 
@@ -138,14 +154,10 @@ int main(void) {
 
   DiM_RESET();
 
-  mem[0x000000] = 0b00001000;
-  mem[0x000001] = 0xD8;
-  mem[0x000002] = 0xC8;
-  mem[0x000003] = 0b00000100;
-
   while (reg_e < (MEM_INS - 0x01) && reg_e < (MEM_MAX - 0x01) && (!(reg_f & 0x80))) {
     DiM_EXECUTE();
     DiM_VALIDATE();
+    DiM_TICK();
   }
 
   printf("##  REGISTER DUMP:\n");
