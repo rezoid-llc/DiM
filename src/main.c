@@ -49,8 +49,6 @@ void DiM_RESET(void) {
 
   reg_e = 0x00;
 
-  DiM_LOAD();
-
 }
 
 
@@ -87,7 +85,8 @@ void DiM_MEM_DUMP(void) {
 
 
 void DiM_TICK(void) {
-  //  "For when "DiM" finally operates off of a clock signal."
+  /*  For when DiM has a clock.
+      DiM currently runs immediately. */
 }
 
 
@@ -118,12 +117,6 @@ void DiM_EXECUTE(void) {
       else if (set == 0x03) { reg_d = nxt; }
       reg_e += 0x02; break;
 
-    case 0x04:
-    //  "Nothing here."
-      
-    case 0x05:
-    //  "Nothing here."
-
     default:
       printf("UNKNOWN INSTRUCTION: \"0x%02X\"\n", opc);
       goto TRM;
@@ -140,7 +133,7 @@ void DiM_VALIDATE(void) {
   reg_b = reg_b & 0xFFFF;
   reg_c = reg_c & 0xFFFF;
   reg_d = reg_d & 0xFFFF;
-  reg_e = reg_e & 0xFFFFFF;
+  reg_e = reg_e & MEM_INS;
   reg_f = reg_f & 0xFF;
   reg_g = reg_g & 0xFFFFFF;
   reg_h = reg_h & 0xFFFFFF;
@@ -153,6 +146,9 @@ void DiM_VALIDATE(void) {
 int main(void) {
 
   DiM_RESET();
+  DiM_LOAD();
+
+  printf("MEM_INS: %06X\n", MEM_INS);
 
   while (reg_e < (MEM_INS - 0x01) && reg_e < (MEM_MAX - 0x01) && (!(reg_f & 0x80))) {
     DiM_EXECUTE();
