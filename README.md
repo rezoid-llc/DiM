@@ -1,5 +1,5 @@
-#     "DiM"
-##    Emulated "DiSC" Implementation
+#    "DiM"
+###  Emulated "DiSC" Implementation
 
 ---
 
