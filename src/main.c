@@ -31,6 +31,7 @@ void DiM_LOAD (void) {
   
 }
 
+
 void DiM_RESET(void) {
 
   reg_a = 0x00;
@@ -133,7 +134,7 @@ void DiM_VALIDATE(void) {
   reg_b = reg_b & 0xFFFF;
   reg_c = reg_c & 0xFFFF;
   reg_d = reg_d & 0xFFFF;
-  reg_e = reg_e & MEM_INS;
+  reg_e = reg_e & (MEM_MAX - 0x01);
   reg_f = reg_f & 0xFF;
   reg_g = reg_g & 0xFFFFFF;
   reg_h = reg_h & 0xFFFFFF;
@@ -147,8 +148,6 @@ int main(void) {
 
   DiM_RESET();
   DiM_LOAD();
-
-  printf("MEM_INS: %06X\n", MEM_INS);
 
   while (reg_e < (MEM_INS - 0x01) && reg_e < (MEM_MAX - 0x01) && (!(reg_f & 0x80))) {
     DiM_EXECUTE();

@@ -22,7 +22,8 @@ These are the general specifications of the emulator, in compliance with the "Di
     ++  Two Pointer Registers:
 		++  G and H.
 
-++  
+++  Sixty Four Total Instructions.
+	++  Only four at the moment.
 
 
 These specifications are currently a work-in-progress.
