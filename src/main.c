@@ -27,8 +27,12 @@ uint8_t  mem[MEM_INS];  //  "General-Purpose (Memory)";
 
 void DiM_LOAD (void) {
 
-  mem[0x000000] = 0b00001100;
-  
+  mem[0x00] = 0b00001100;
+  mem[0x01] = 0b01010101;
+  mem[0x02] = 0b10101010;
+  mem[0x03] = 0b00010100;
+  mem[0x04] = 0b00000100;
+
 }
 
 
@@ -93,10 +97,10 @@ void DiM_TICK(void) {
 
 void DiM_EXECUTE(void) {
 
-  uint8_t ins = mem[reg_e];
-  uint8_t opc = ((ins & 0xFC) >> 0x02);
-  uint8_t set = (ins & 0x03);
-
+  uint8_t  ins = mem[reg_e];
+  uint8_t  opc = ((ins & 0xFC) >> 0x02);
+  uint8_t  set = (ins & 0x03);
+  uint16_t nxt;
 
   switch (opc) {
 
@@ -111,17 +115,48 @@ void DiM_EXECUTE(void) {
 
     case 0x03:
       LWI:;
-      uint16_t nxt = (mem[reg_e + 0x01] << 0x08 | mem[reg_e + 0x02]);
+      nxt = (mem[reg_e + 0x01] << 0x08 | mem[reg_e + 0x02]);
       if (set == 0x00) { reg_a = nxt; }
       else if (set == 0x01) { reg_b = nxt; }
       else if (set == 0x02) { reg_c = nxt; }
       else if (set == 0x03) { reg_d = nxt; }
-      reg_e += 0x02; break;
+      reg_e += 0x03; break;
+
+    case 0x04:
+      MWA:;
+      if (set == 0x00) { reg_a = reg_a; }
+      else if (set == 0x01) { reg_a = reg_b; }
+      else if (set == 0x02) { reg_a = reg_a; }
+      else if (set == 0x03) { reg_a = reg_d; }
+      reg_e += 0x01; break;
+
+    case 0x05:
+      MWB:;
+      if (set == 0x00) { reg_b = reg_a; }
+      else if (set == 0x01) { reg_b = reg_b; }
+      else if (set == 0x02) { reg_b = reg_a; }
+      else if (set == 0x03) { reg_b = reg_d; }
+      reg_e += 0x01; break;
+
+    case 0x06:
+      MWC:;
+      if (set == 0x00) { reg_c = reg_a; }
+      else if (set == 0x01) { reg_c = reg_b; }
+      else if (set == 0x02) { reg_c = reg_a; }
+      else if (set == 0x03) { reg_c = reg_d; }
+      reg_e += 0x01; break;
+
+    case 0x07:
+      MWD:;
+      if (set == 0x00) { reg_d = reg_a; }
+      else if (set == 0x01) { reg_d = reg_b; }
+      else if (set == 0x02) { reg_d = reg_a; }
+      else if (set == 0x03) { reg_d = reg_d; }
+      reg_e += 0x01; break;
 
     default:
       printf("UNKNOWN INSTRUCTION: \"0x%02X\"\n", opc);
       goto TRM;
-
 
   }
 
