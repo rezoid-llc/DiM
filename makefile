@@ -3,12 +3,15 @@
 
 
 CC        :=  clang
-CCFLAGS   :=  -O3 -std=c23
+CCFLAGS   :=  -fsanitize=address -O3 -std=c23
 .PHONY:   all run clean
 
 
 TARGET := bld/DiM
 SOURCE := $(wildcard src/*.c)
+
+
+FILE ?= prg.bin
 
 
 all:
@@ -29,7 +32,7 @@ run:
 	@echo "Finished."
 	@echo ""
 
-	@$(TARGET)
+	@$(TARGET) $(FILE)
 
 	
 clean:
